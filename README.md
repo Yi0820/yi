@@ -1,0 +1,597 @@
+[birthday_countdown_standalone.html](https://github.com/user-attachments/files/23673615/birthday_countdown_standalone.html)
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="18岁成人礼纪念网页">
+    <meta name="theme-color" content="#667eea">
+    <title>生日快乐纪念</title>
+    <style>
+        /* CSS变量定义 - 使用CSS变量可以减少重复并便于主题切换 */
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --accent-color: #ffe66d;
+            --dark-color: #292f36;
+            --light-color: #f7fff7;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --animation-duration: 0.5s;
+        }
+
+        /* CSS变量定义 - 提升渲染性能的关键样式 */
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #FFE66D;
+            --dark-color: #1A535C;
+            --light-color: #F7FFF7;
+            --animation-duration: 0.5s;
+        }
+
+        /* 全局样式重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 页面加载动画 */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--light-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .fade-out {
+            opacity: 0;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(78, 205, 196, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 主容器 */
+        #container {
+            display: none;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .fade-in {
+            animation: fadeIn var(--animation-duration) ease-in-out;
+            will-change: opacity;
+            transform: translateZ(0);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 粒子背景 */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 15s ease-in-out infinite;
+            opacity: 0.6;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        /* 欢迎部分样式 */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: slideIn 1s ease-out;
+        }
+
+        .hero-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+            animation: slideIn 1s ease-out 0.2s both;
+        }
+
+        #countdown {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 1rem 2rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        #startButton {
+            display: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            font-weight: bold;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        #startButton.visible {
+            display: inline-block;
+        }
+
+        #startButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            background-color: #ff5252;
+        }
+
+        /* 动画类 - 性能优化版 */
+        .slide-in {
+            animation: slideIn var(--animation-duration) ease-out;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .bounce {
+            animation: bounce 2s ease-in-out infinite;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* 漂浮动画 */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(10deg);
+            }
+        }
+
+        /* 漂浮装饰元素 */
+        .floating-element {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            opacity: 0.7;
+            animation: float 15s ease-in-out infinite;
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            z-index: 10;
+        }
+
+        /* 庆祝效果 */
+        .confetti {
+            position: absolute;
+            pointer-events: none;
+            animation: confetti-fall 3s ease-in-out forwards;
+            will-change: transform, opacity;
+            transform: translateZ(0);
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg) translateX(100px) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: rgba(26, 83, 92, 0.05);
+            color: var(--dark-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-section h2 {
+                font-size: 1.2rem;
+            }
+            
+            #startButton {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+            
+            #countdown {
+                font-size: 1.2rem;
+                padding: 0.8rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-section h2 {
+                font-size: 1rem;
+            }
+            
+            #countdown {
+                font-size: 1rem;
+                padding: 0.6rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 页面加载动画 -->
+    <div class="loader-container">
+        <div class="loader"></div>
+        <p>准备特别的惊喜...</p>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container" id="container">
+        <!-- 欢迎部分 -->
+        <header class="hero-section">
+            <h1 class="glow-text">生日快乐</h1>
+            <p class="subtitle">特别的日子，特别的祝福</p>
+            <div class="countdown" id="countdown"></div>
+            <button class="btn-primary" id="startButton">开始探索</button>
+        </header>
+
+        <!-- 特效背景 -->
+        <div class="particle-container" id="particles"></div>
+
+        <!-- 底部版权 -->
+        <footer>
+            <p>小兰制作</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面加载动画
+            const loaderContainer = document.querySelector('.loader-container');
+            const container = document.getElementById('container');
+            
+            // 模拟加载完成
+            setTimeout(() => {
+                loaderContainer.classList.add('fade-out');
+                setTimeout(() => {
+                    loaderContainer.style.display = 'none';
+                    container.style.display = 'block';
+                    // 创建粒子背景
+                    createParticles();
+                    // 初始化倒计时
+                    initCountdown();
+                    // 创建漂浮元素
+                    createFloatingElements();
+                    // 播放欢迎音效
+                    playWelcomeSound();
+                }, 500);
+            }, 1500);
+
+            // 开始按钮点击事件
+            const startButton = document.getElementById('startButton');
+            startButton.addEventListener('click', function() {
+                // 播放生日歌
+                playBirthdaySong();
+                // 创建庆祝效果
+                createConfetti();
+            });
+
+            // 初始化倒计时 - 计算到11月25日生日
+            function initCountdown() {
+                const countdownElement = document.getElementById('countdown');
+                if (!countdownElement) return;
+                
+                function updateCountdown() {
+                    const now = new Date();
+                    let birthday = new Date(now.getFullYear(), 10, 25); // 11月25日（月份从0开始）
+                    
+                    // 如果今年的生日已经过了，则计算到明年生日的时间
+                    if (now > birthday) {
+                        birthday.setFullYear(birthday.getFullYear() + 1);
+                    }
+                    
+                    // 计算剩余时间
+                    const diffTime = birthday - now;
+                    
+                    // 转换为天、时、分、秒
+                    const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diffTime % (1000 * 60)) / 1000);
+                    
+                    // 显示倒计时
+                    countdownElement.textContent = `距离生日还有 ${days} 天 ${hours} 时 ${minutes} 分 ${seconds} 秒`;
+                    
+                    // 如果是生日当天
+                    if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
+                        countdownElement.textContent = '生日快乐！🎉';
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            countdownElement.style.display = 'none';
+                            startButton.classList.add('visible');
+                        }, 2000);
+                    }
+                }
+                
+                // 立即更新一次
+                updateCountdown();
+                
+                // 每秒更新一次
+                const interval = setInterval(updateCountdown, 1000);
+            }
+
+            // 创建粒子背景
+            function createParticles() {
+                const particlesContainer = document.getElementById('particles');
+                if (!particlesContainer) return;
+                
+                for (let i = 0; i < 100; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    // 随机位置
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.top = `${Math.random() * 100}%`;
+                    
+                    // 随机大小
+                    const size = Math.random() * 5 + 1;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    // 随机颜色
+                    const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#1A535C', '#F9C80E'];
+                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // 随机动画延迟和持续时间
+                    particle.style.animationDelay = `${Math.random() * 5}s`;
+                    particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                    
+                    particlesContainer.appendChild(particle);
+                }
+            }
+
+            // 创建彩色粒子效果
+            function createConfetti() {
+                const particlesContainer = document.getElementById('particles');
+                if (!particlesContainer) return;
+                
+                requestAnimationFrame(() => {
+                    const fragment = document.createDocumentFragment();
+                    
+                    for (let i = 0; i < 150; i++) {
+                        const confetti = document.createElement('div');
+                        confetti.classList.add('confetti');
+                        
+                        confetti.style.left = `${Math.random() * 100}%`;
+                        confetti.style.top = `${Math.random() * 20 - 10}%`;
+                        
+                        const size = Math.random() * 10 + 5;
+                        confetti.style.width = `${size}px`;
+                        confetti.style.height = `${size}px`;
+                        
+                        const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#1A535C', '#F9C80E', '#FF8C42'];
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        confetti.style.animationDelay = `${Math.random() * 2}s`;
+                        confetti.style.animationDuration = `${Math.random() * 3 + 3}s`;
+                        confetti.style.willChange = 'transform, opacity';
+                        
+                        fragment.appendChild(confetti);
+                    }
+                    
+                    particlesContainer.appendChild(fragment);
+                    
+                    setTimeout(() => {
+                        requestAnimationFrame(() => {
+                            const confettiElements = particlesContainer.querySelectorAll('.confetti');
+                            confettiElements.forEach(element => {
+                                element.style.opacity = '0';
+                                setTimeout(() => element.remove(), 500);
+                            });
+                        });
+                    }, 3000);
+                });
+            }
+
+            // 创建漂浮元素
+            function createFloatingElements() {
+                const container = document.getElementById('container');
+                if (!container) return;
+                
+                requestAnimationFrame(() => {
+                    const fragment = document.createDocumentFragment();
+                    
+                    for (let i = 0; i < 8; i++) {
+                        const element = document.createElement('div');
+                        element.classList.add('floating-element');
+                        
+                        const types = ['star', 'heart'];
+                        const type = types[Math.floor(Math.random() * types.length)];
+                        element.classList.add(`floating-${type}`);
+                        
+                        element.style.left = `${Math.random() * 100}%`;
+                        element.style.top = `${Math.random() * 100}%`;
+                        
+                        element.style.animationDelay = `${Math.random() * 5}s`;
+                        element.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                        
+                        element.textContent = type === 'star' ? '⭐' : '❤️';
+                        
+                        fragment.appendChild(element);
+                    }
+                    
+                    container.appendChild(fragment);
+                });
+            }
+
+            // 播放生日歌
+            function playBirthdaySong() {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) {
+                    console.log('浏览器不支持 Web Audio API');
+                    return;
+                }
+                
+                const ctx = new AudioContext();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                const notes = [
+                    { note: 440, duration: 0.25 },
+                    { note: 440, duration: 0.25 },
+                    { note: 493.88, duration: 0.5 },
+                    { note: 440, duration: 0.5 },
+                    { note: 587.33, duration: 0.5 },
+                    { note: 554.37, duration: 1 }
+                ];
+                
+                let startTime = ctx.currentTime;
+                
+                notes.forEach(noteInfo => {
+                    const now = ctx.currentTime;
+                    oscillator.frequency.setValueAtTime(noteInfo.note, now);
+                    gainNode.gain.setValueAtTime(0.3, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + noteInfo.duration);
+                    startTime += noteInfo.duration;
+                });
+                
+                oscillator.start();
+                oscillator.stop(startTime);
+            }
+
+            // 播放欢迎音效
+            function playWelcomeSound() {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) {
+                    console.log('浏览器不支持 Web Audio API');
+                    return;
+                }
+                
+                const ctx = new AudioContext();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(220, ctx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.5);
+                
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                
+                oscillator.start();
+                oscillator.stop(ctx.currentTime + 0.5);
+            }
+        });
+    </script>
+</body>
+</html>
