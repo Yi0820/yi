@@ -1,4 +1,3 @@
-(https://github.com/user-attachments/files/23673615/birthday_countdown_standalone.html)
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
